@@ -17,19 +17,23 @@ const books = [
 // Type definitions define the "shape" of your data and specify
 // which ways the data can be fetched from the GraphQL server.
 const typeDefs = gql`
-  # Comments in GraphQL are defined with the hash (#) symbol.
+    # Comments in GraphQL are defined with the hash (#) symbol.
 
-  # This "Book" type can be used in other type declarations.
-  type Book {
-    title: String
-    author: String
-  }
+    # This "Book" type can be used in other type declarations.
+    type Book {
+        title: String
+        author: String
+    }
 
-  # The "Query" type is the root of all GraphQL queries.
-  # (A "Mutation" type will be covered later on.)
-  type Query {
-    books: [Book]
-  }
+    # The "Query" type is the root of all GraphQL queries.
+    # (A "Mutation" type will be covered later on.)
+    type Query {
+        books: [Book]
+    }
+
+    type Mutation {
+        addBook(title: String, author: String): Book
+    }
 `;
 
 // Resolvers define the technique for fetching the types in the
@@ -38,15 +42,31 @@ const resolvers = {
   Query: {
     books: () => books,
   },
+  Mutation: {
+    addBook: (obj, args, context, info) => {
+      const book = {
+        title: args.title,
+        author: args.author,
+      };
+      books.push(book);
+      return book;
+    },
+  },
 };
 
 // In the most basic sense, the ApolloServer can be started
 // by passing type definitions (typeDefs) and the resolvers
 // responsible for fetching the data for those types.
-const server = new ApolloServer({ typeDefs, resolvers });
+const server = new ApolloServer({
+  typeDefs,
+  resolvers,
+  // engine: {
+  //   apiKey: ENGINE_API_KEY,
+  // },
+});
 
 // This `listen` method launches a web-server.  Existing apps
 // can utilize middleware options, which we'll discuss later.
 server.listen().then(({ url }) => {
-  console.log(`🚀  Server ready at ${url}`);
+  console.log(`🚀  Server ready at ${ url }`);
 });
